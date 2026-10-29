@@ -328,11 +328,9 @@ class PklPeriodController extends Controller
             );
     }
 
-    /**
-     * Menghapus periode PKL.
-     */
     public function destroy(PklPeriod $pklPeriod): RedirectResponse
     {
+        // Periode aktif tidak boleh dihapus.
         if ($pklPeriod->status === 'aktif') {
             return redirect()
                 ->route('kaprodi.pkl-periods.index')
@@ -342,18 +340,12 @@ class PklPeriodController extends Controller
                 );
         }
 
-        if ($pklPeriod->batches()->exists()) {
-            return redirect()
-                ->route('kaprodi.pkl-periods.index')
-                ->with(
-                    'error',
-                    'Periode tidak dapat dihapus karena masih memiliki batch PKL.'
-                );
-        }
-
         DB::transaction(function () use ($pklPeriod) {
+            // Hapus relasi many-to-many dengan CPL.
             $pklPeriod->cpls()->detach();
 
+            // Hapus periode. Batch terkait akan mengikuti
+            // aturan cascadeOnDelete pada database.
             $pklPeriod->delete();
         });
 
@@ -361,19 +353,10 @@ class PklPeriodController extends Controller
             ->route('kaprodi.pkl-periods.index')
             ->with(
                 'success',
-                'Periode PKL berhasil dihapus.'
+                'Periode PKL beserta batch terkait berhasil dihapus.'
             );
     }
 
-    /**
-     * Menghasilkan rekomendasi semester dan tahun akademik
-     * berdasarkan tanggal sistem.
-     *
-     * Januari-Juni  : Genap, tahun akademik dimulai tahun sebelumnya.
-     * Juli-Desember : Ganjil, tahun akademik dimulai tahun berjalan.
-     *
-     * Hasilnya hanya digunakan sebagai nilai awal form.
-     */
     private function recommendedAcademicPeriod(): array
     {
         $now = now();
@@ -393,5 +376,18 @@ class PklPeriodController extends Controller
             'semester' => $semester,
             'tahun_akademik' => $startYear . '/' . ($startYear + 1),
         ];
+    }
+
+    public function acc(PklPeriod $pklPeriod)
+    {
+        $pklPeriod->load([
+            'batches' => function ($query) {
+                $query->orderBy('tanggal_mulai');
+            },
+        ]);
+
+        return view('kaprodi.pkl-periods.acc', compact(
+            'pklPeriod'
+        ));
     }
 }

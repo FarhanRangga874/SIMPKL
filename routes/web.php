@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Kaprodi\PklPeriodController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Kaprodi\CplController;
+use App\Http\Controllers\Kaprodi\PklBatchController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -97,6 +98,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 '/pkl-periods/{pklPeriod}/finish',
                 [PklPeriodController::class, 'finish']
             )->name('pkl-periods.finish');
+
+            // Batch Pendaftaran PKL
+            Route::get('/pkl-batches', [PklBatchController::class, 'index'])
+                ->name('pkl-batches.index');
+
+            Route::post('/pkl-batches', [PklBatchController::class, 'store'])
+                ->name('pkl-batches.store');
+
+            Route::put('/pkl-batches/{pklBatch}', [PklBatchController::class, 'update'])
+                ->name('pkl-batches.update');
+
+            Route::delete('/pkl-batches/{pklBatch}', [PklBatchController::class, 'destroy'])
+                ->name('pkl-batches.destroy');
+
+            Route::get('/pkl-periods/{pklPeriod}/acc',[PklPeriodController::class, 'acc'])
+                ->name('pkl-periods.acc');
 
         });
 });
