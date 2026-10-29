@@ -5,7 +5,7 @@
     $classes = ($active ?? false)
         ? 'flex w-full items-center gap-3 rounded-lg px-3 py-2.5
         text-sm font-semibold
-        bg-blue-500 text-white
+        bg-gray-100 text-gray-900
         dark:bg-blue-500/10 dark:text-blue-400
         focus:outline-none focus-visible:ring-2
         focus-visible:ring-blue-500
